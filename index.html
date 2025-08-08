@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Writing Checker</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Independent Student Writing Checker</h1>
+    <p>Free, transparent, and API-free tool for educators. No data leaves your device.</p>
+  </header>
+
+  <main>
+    <section>
+      <label for="studentText">Paste or type student writing:</label><br/>
+      <textarea id="studentText" rows="10" placeholder="Paste text here..."></textarea>
+    </section>
+
+    <section>
+      <button id="runCheck">Run Check</button>
+      <button id="downloadPDF" disabled>Download Feedback PDF</button>
+    </section>
+
+    <section id="results">
+      <h2>Results</h2>
+      <div id="aiDetection">
+        <h3>AI Detection</h3>
+        <ul id="aiFlags"></ul>
+      </div>
+      <div id="plagiarismCheck">
+        <h3>Plagiarism Check</h3>
+        <ul id="plagiarismFlags"></ul>
+      </div>
+      <div id="feedbackSection">
+        <h3>Editable Feedback</h3>
+        <textarea id="teacherFeedback" rows="6" placeholder="Write your feedback here..."></textarea>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Student Writing Checker — Built for teachers, not punishment</p>
+  </footer>
+
+  <!-- Core Logic -->
+  <script type="module">
+    import { findPatterns } from './js/patternMatcher.js';
+    import { premiumEnabled } from './js/premiumHooks.js';
+
+    const { jsPDF } = window.jspdf;
+
+    const textArea = document.getElementById('studentText');
+    const runCheckBtn = document.getElementById('runCheck');
+    const downloadPDFBtn = document.getElementById('downloadPDF');
+    const aiFlagsList = document.getElementById('aiFlags');
+    const plagiarismFlagsList = document.getElementById('plagiarismFlags');
+    const feedbackBox = document.getElementById('teacherFeedback');
+
+    runCheckBtn.addEventListener('click', () => {
+      const text = textArea.value.trim();
+      aiFlagsList.innerHTML = '';
+      plagiarismFlagsList.innerHTML = '';
+
+      if (!text) {
+        alert('Please paste student writing first.');
+        return;
+      }
+
+      // Example AI detection patterns
+      const aiIndicators = [
+        { phrase: 'in conclusion', reason: 'Overused phrase, common in AI outputs' },
+        { phrase: 'furthermore', reason: 'Predictable transition often seen in AI text' }
+      ];
+
+      aiIndicators.forEach(indicator => {
+        if (text.toLowerCase().includes(indicator.phrase)) {
+          const li = document.createElement('li');
+          li.textContent = `"${indicator.phrase}" — ${indicator.reason}`;
+          aiFlagsList.appendChild(li);
+        }
+      });
+
+      // Example plagiarism detection stub
+      if (text.includes('Four score and seven years ago')) {
+        const li = document.createElement('li');
+        li.innerHTML = `Matches historical speech — <a href="https://www.abrahamlincolnonline.org/lincoln/speeches/gettysburg.htm" target="_blank">Source</a>`;
+        plagiarismFlagsList.appendChild(li);
+      }
+
+      // Pattern matcher hook (expand later)
+      const patterns = findPatterns(text);
+      patterns.forEach(match => {
+        const li = document.createElement('li');
+        li.textContent = `Pattern match: ${match}`;
+        aiFlagsList.appendChild(li);
+      });
+
+      downloadPDFBtn.disabled = false;
+    });
+
+    downloadPDFBtn.addEventListener('click', () => {
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text('Student Writing Checker Feedback', 10, 10);
+
+      doc.setFontSize(12);
+      doc.text('AI Detection Flags:', 10, 20);
+      Array.from(aiFlagsList.children).forEach((item, i) => {
+        doc.text(`- ${item.textContent}`, 10, 30 + (i * 10));
+      });
+
+      let yOffset = 30 + (aiFlagsList.children.length * 10);
+      doc.text('Plagiarism Flags:', 10, yOffset);
+      Array.from(plagiarismFlagsList.children).forEach((item, i) => {
+        doc.text(`- ${item.textContent}`, 10, yOffset + 10 + (i * 10));
+      });
+
+      yOffset += 20 + (plagiarismFlagsList.children.length * 10);
+      doc.text('Teacher Feedback:', 10, yOffset);
+      doc.text(feedbackBox.value || 'No feedback added.', 10, yOffset + 10);
+
+      doc.save('student_feedback.pdf');
+    });
+  </script>
+</body>
+</html>
