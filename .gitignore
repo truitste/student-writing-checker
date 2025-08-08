@@ -1,0 +1,43 @@
+# Ignore Python cache and compiled files
+__pycache__/
+*.py[cod]
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore node modules if we ever use JS frameworks
+node_modules/
+
+# Ignore environment/config files
+*.env
+*.ini
+*.cfg
+*.toml
+
+# Ignore text-based secrets files
+secrets.txt
+holidays.txt
+*.key
+*.pem
+*.crt
+
+# Ignore virtual environment folders
+.venv/
+venv/
+
+# Ignore log files
+*.log
+
+# Ignore temporary or backup files
+*.tmp
+*.bak
+*.swp
+
+# Ignore PDF and generated reports
+*.pdf
+*.docx
+*.xlsx
+
+# Ignore OS or IDE metadata
+.idea/
+.vscode/
